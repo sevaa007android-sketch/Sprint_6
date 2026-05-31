@@ -1,97 +1,59 @@
-from conftest import DEFAULT_TIMEOUT
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import time
+from pages.base_page import BasePage
+from locators.order_page_locators import OrderPageLocators
 
-class OrderPage:
+class OrderPage(BasePage):
     def __init__(self, driver):
-        self.driver = driver
+        super().__init__(driver)
 
-    # Локаторы формы заказа (первая страница)
-    NAME_FIELD = (By.XPATH, "//input[@placeholder='* Имя']")
-    SURNAME_FIELD = (By.XPATH, "//input[@placeholder='* Фамилия']")
-    ADDRESS_FIELD = (By.XPATH, "//input[@placeholder='* Адрес: куда привезти заказ']")
-    METRO_FIELD = (By.XPATH, "//input[@placeholder='* Станция метро']")
-    FIRST_METRO_OPTION = (By.XPATH, "//div[@class='select-search__select']//li")
-    PHONE_FIELD = (By.XPATH, "//input[@placeholder='* Телефон: на него позвонит курьер']")
-    NEXT_BUTTON = (By.XPATH, "//button[text()='Далее']")
-
-    # Локаторы второй страницы (дата, аренда, цвет)
-    DATE_FIELD = (By.XPATH, "//input[@placeholder='* Когда привезти самокат']")
-    RENTAL_PERIOD_FIELD = (By.CLASS_NAME, "Dropdown-control")
-    RENTAL_OPTIONS = (By.CLASS_NAME, "Dropdown-option")
-    COLOR_BLACK = (By.ID, "black")
-    COLOR_GREY = (By.ID, "grey")
-    ORDER_BUTTON = (By.XPATH, "//div[contains(@class, 'Order_Buttons')]//button[text()='Заказать']")
-
-    # Кнопка подтверждения и сообщение об успехе
-    CONFIRM_BUTTON = (By.XPATH, "//button[text()='Да']")
-    SUCCESS_MESSAGE = (By.XPATH, "//div[contains(text(), 'Заказ оформлен')]")
-
-    # Методы для заполнения первой страницы
+    # Первая страница
     def fill_name(self, name):
-        self.driver.find_element(*self.NAME_FIELD).send_keys(name)
+        self.send_keys_to_element(OrderPageLocators.NAME_FIELD, name)
 
     def fill_surname(self, surname):
-        self.driver.find_element(*self.SURNAME_FIELD).send_keys(surname)
+        self.send_keys_to_element(OrderPageLocators.SURNAME_FIELD, surname)
 
     def fill_address(self, address):
-        self.driver.find_element(*self.ADDRESS_FIELD).send_keys(address)
+        self.send_keys_to_element(OrderPageLocators.ADDRESS_FIELD, address)
 
     def fill_metro(self, metro_station):
-        self.driver.find_element(*self.METRO_FIELD).click()
-        time.sleep(0.5)
-        metro_input = self.driver.find_element(*self.METRO_FIELD)
-        metro_input.clear()
-        metro_input.send_keys(metro_station)
-        time.sleep(0.5)
-        first_option = WebDriverWait(self.driver, DEFAULT_TIMEOUT).until(
-            EC.element_to_be_clickable(self.FIRST_METRO_OPTION)
-        )
-        first_option.click()
+        self.click_element(OrderPageLocators.METRO_FIELD)
+        self.clear_and_send_keys(OrderPageLocators.METRO_FIELD, metro_station)
+        self.click_element(OrderPageLocators.FIRST_METRO_OPTION)
 
     def fill_phone(self, phone):
-        self.driver.find_element(*self.PHONE_FIELD).send_keys(phone)
+        self.send_keys_to_element(OrderPageLocators.PHONE_FIELD, phone)
 
     def click_next(self):
-        self.driver.find_element(*self.NEXT_BUTTON).click()
+        self.click_element(OrderPageLocators.NEXT_BUTTON)
 
-    # Методы для второй страницы
+    # Вторая страница
     def fill_date(self, date):
-        self.driver.find_element(*self.DATE_FIELD).send_keys(date)
-        # Клик по другому элементу, чтобы закрыть календарь
-        self.driver.find_element(*self.ORDER_BUTTON).click()
+        self.send_keys_to_element(OrderPageLocators.DATE_FIELD, date)
+        self.click_element(OrderPageLocators.ORDER_BUTTON)  # закрыть календарь
 
     def select_rental_period(self, period_text):
-        self.driver.find_element(*self.RENTAL_PERIOD_FIELD).click()
-        time.sleep(0.5)
-        options = self.driver.find_elements(*self.RENTAL_OPTIONS)
+        self.click_element(OrderPageLocators.RENTAL_PERIOD_FIELD)
+        options = self.get_elements(OrderPageLocators.RENTAL_OPTIONS)
         for option in options:
             if period_text.lower() in option.text.lower():
-                option.click()
+                self.click_element_by_element(option)
                 break
 
     def select_color(self, color):
         if color == "black":
-            self.driver.find_element(*self.COLOR_BLACK).click()
+            self.click_element(OrderPageLocators.COLOR_BLACK)
         elif color == "grey":
-            self.driver.find_element(*self.COLOR_GREY).click()
+            self.click_element(OrderPageLocators.COLOR_GREY)
 
     def click_order(self):
-        self.driver.find_element(*self.ORDER_BUTTON).click()
+        self.click_element(OrderPageLocators.ORDER_BUTTON)
 
     def confirm_order(self):
-        WebDriverWait(self.driver, DEFAULT_TIMEOUT).until(
-            EC.element_to_be_clickable(self.CONFIRM_BUTTON)
-        ).click()
+        self.click_element(OrderPageLocators.CONFIRM_BUTTON)
 
     def get_success_message(self):
-        return WebDriverWait(self.driver, DEFAULT_TIMEOUT).until(
-            EC.visibility_of_element_located(self.SUCCESS_MESSAGE)
-        ).text
+        return self.get_element_text(OrderPageLocators.SUCCESS_MESSAGE)
 
-    # Универсальный метод заполнения всей формы 
     def fill_order_form(self, data):
         self.fill_name(data["name"])
         self.fill_surname(data["surname"])
@@ -99,9 +61,7 @@ class OrderPage:
         self.fill_metro(data["metro"])
         self.fill_phone(data["phone"])
         self.click_next()
-        WebDriverWait(self.driver, DEFAULT_TIMEOUT).until(
-            EC.visibility_of_element_located(self.DATE_FIELD)
-        )
+        self.wait_for_element_visible(OrderPageLocators.DATE_FIELD)
         self.fill_date(data["date"])
         self.select_rental_period(data["rental_period"])
         self.select_color(data["color"])

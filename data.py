@@ -1,8 +1,28 @@
-import allure
-import pytest
-from conftest import BASE_URL
-from pages.main_page import MainPage
+# Данные для заказа через верхнюю кнопку
+ORDER_DATA_TOP = {
+    "name": "Иван",
+    "surname": "Иванов",
+    "address": "ул. Пушкина, 1",
+    "metro": "Сокольники",
+    "phone": "+79998887766",
+    "date": "01.06.2025",
+    "rental_period": "сутки",
+    "color": "black"
+}
 
+# Данные для заказа через нижнюю кнопку
+ORDER_DATA_BOTTOM = {
+    "name": "Петр",
+    "surname": "Петров",
+    "address": "пр. Ленина, 5",
+    "metro": "Лубянка",
+    "phone": "+79123456789",
+    "date": "15.06.2025",
+    "rental_period": "двое суток",
+    "color": "grey"
+}
+
+# Данные для вопросов FAQ
 FAQ_DATA = [
     (0, "Сутки — 400 рублей. Оплата курьеру — наличными или картой."),
     (1, "Пока что у нас так: один заказ — один самокат. Если хотите покататься с друзьями, можете просто сделать несколько заказов — один за другим."),
@@ -13,17 +33,3 @@ FAQ_DATA = [
     (6, "Да, пока самокат не привезли. Штрафа не будет, объяснительной записки тоже не попросим. Все же свои."),
     (7, "Да, обязательно. Всем самокатов! И Москве, и Московской области.")
 ]
-
-class TestFAQ:
-    @allure.title("Проверка текста ответа на вопрос №{index}")
-    @pytest.mark.parametrize("index, expected_text", FAQ_DATA)
-    def test_question_answer(self, driver, index, expected_text):
-        main_page = MainPage(driver)
-        with allure.step("Открыть главную страницу"):
-            main_page.open_main_page()
-        with allure.step(f"Кликнуть на вопрос {index}"):
-            main_page.click_question(index)
-        with allure.step("Дождаться появления ответа и проверить текст"):
-            main_page.wait_for_answer_visible(index)
-            actual_text = main_page.get_answer_text(index)
-            assert actual_text == expected_text

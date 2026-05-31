@@ -1,53 +1,47 @@
 import allure
-import pytest
+from data import ORDER_DATA_TOP, ORDER_DATA_BOTTOM
 from pages.main_page import MainPage
 from pages.order_page import OrderPage
 
-# Данные для параметризации:
-ORDER_DATA = [
-    ("top", {
-        "name": "Иван",
-        "surname": "Иванов",
-        "address": "ул. Пушкина, 10",
-        "metro": "Сокольники",
-        "phone": "+79998887766",
-        "date": "30.06.2026",
-        "rental_period": "сутки",
-        "color": "black"
-    }),
-    ("bottom", {
-        "name": "Петр",
-        "surname": "Петров",
-        "address": "пр. Ленина, 5",
-        "metro": "Лубянка",
-        "phone": "+79123456789",
-        "date": "31.05.2025",
-        "rental_period": "двое суток",
-        "color": "grey"
-    })
-]
-
 class TestOrder:
-    @allure.title("Оформление заказа самоката через кнопку {button_type}")
-    @pytest.mark.parametrize("button_type, order_data", ORDER_DATA)
-    def test_order_scooter(self, driver, button_type, order_data):
-        # Открыть главную страницу
-        driver.get("https://qa-scooter.praktikum-services.ru/")
+    @allure.title("Оформление заказа самоката через верхнюю кнопку «Заказать»")
+    def test_order_scooter_top_button(self, driver):
         main_page = MainPage(driver)
         order_page = OrderPage(driver)
 
-        # Закрыть баннер куки, если он мешает (особенно для нижней кнопки)
-        main_page.close_cookie_banner()
+        with allure.step("Открыть главную страницу"):
+            main_page.open_main_page()
 
-        # Нажать на соответствующую кнопку «Заказать»
-        if button_type == "top":
+        with allure.step("Закрыть баннер куки, если мешает"):
+            main_page.close_cookie_banner()
+
+        with allure.step("Нажать верхнюю кнопку «Заказать»"):
             main_page.click_order_top_button()
-        else:
+
+        with allure.step("Заполнить форму заказа и подтвердить"):
+            order_page.fill_order_form(ORDER_DATA_TOP)
+
+        with allure.step("Проверить, что появилось сообщение об успехе"):
+            success_text = order_page.get_success_message()
+            assert "Заказ оформлен" in success_text
+
+    @allure.title("Оформление заказа самоката через нижнюю кнопку «Заказать»")
+    def test_order_scooter_bottom_button(self, driver):
+        main_page = MainPage(driver)
+        order_page = OrderPage(driver)
+
+        with allure.step("Открыть главную страницу"):
+            main_page.open_main_page()
+
+        with allure.step("Закрыть баннер куки, если мешает"):
+            main_page.close_cookie_banner()
+
+        with allure.step("Нажать нижнюю кнопку «Заказать»"):
             main_page.click_order_bottom_button()
 
-        # Заполнить форму заказа (универсальный метод)
-        order_page.fill_order_form(order_data)
+        with allure.step("Заполнить форму заказа и подтвердить"):
+            order_page.fill_order_form(ORDER_DATA_BOTTOM)
 
-        # Проверить, что появилось сообщение об успешном заказе
-        success_text = order_page.get_success_message()
-        assert "Заказ оформлен" in success_text
+        with allure.step("Проверить, что появилось сообщение об успехе"):
+            success_text = order_page.get_success_message()
+            assert "Заказ оформлен" in success_text
