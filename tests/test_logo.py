@@ -11,8 +11,7 @@ class TestLogos:
         with allure.step("Кликнуть по логотипу Самокат"):
             main_page.click_scooter_logo()
         with allure.step("Проверить, что URL стал главной страницей"):
-            main_page.wait_for_main_page_url()
-            assert driver.current_url == BASE_URL
+            assert main_page.is_current_url_equal(BASE_URL), "Не удалось перейти на главную страницу"
 
     @allure.title("Открытие Дзена по логотипу Яндекса в новом окне")
     def test_yandex_logo_opens_dzen(self, driver):
@@ -24,5 +23,4 @@ class TestLogos:
         with allure.step("Переключиться на новое окно"):
             main_page.switch_to_new_window()
         with allure.step("Проверить, что URL содержит 'dzen.ru'"):
-            main_page.wait_for_url_contains("dzen.ru")
-            assert "dzen.ru" in driver.current_url
+            assert main_page.is_url_contains("dzen.ru"), "Не удалось открыть Дзен"

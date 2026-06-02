@@ -22,8 +22,7 @@ class TestOrder:
             order_page.fill_order_form(ORDER_DATA_TOP)
 
         with allure.step("Проверить, что появилось сообщение об успехе"):
-            success_text = order_page.get_success_message()
-            assert "Заказ оформлен" in success_text
+            assert order_page.is_success_message_displayed(), "Сообщение об успешном заказе не появилось"
 
     @allure.title("Оформление заказа самоката через нижнюю кнопку «Заказать»")
     def test_order_scooter_bottom_button(self, driver):
@@ -43,5 +42,4 @@ class TestOrder:
             order_page.fill_order_form(ORDER_DATA_BOTTOM)
 
         with allure.step("Проверить, что появилось сообщение об успехе"):
-            success_text = order_page.get_success_message()
-            assert "Заказ оформлен" in success_text
+            assert order_page.is_success_message_displayed(), "Сообщение об успешном заказе не появилось"

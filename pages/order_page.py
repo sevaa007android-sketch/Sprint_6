@@ -51,8 +51,8 @@ class OrderPage(BasePage):
     def confirm_order(self):
         self.click_element(OrderPageLocators.CONFIRM_BUTTON)
 
-    def get_success_message(self):
-        return self.get_element_text(OrderPageLocators.SUCCESS_MESSAGE)
+    def is_success_message_displayed(self):
+        return self.is_element_displayed(OrderPageLocators.SUCCESS_MESSAGE)
 
     def fill_order_form(self, data):
         self.fill_name(data["name"])

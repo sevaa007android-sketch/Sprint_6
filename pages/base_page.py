@@ -1,6 +1,7 @@
 from conftest import DEFAULT_TIMEOUT
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 class BasePage:
     def __init__(self, driver):
@@ -44,12 +45,6 @@ class BasePage:
             EC.visibility_of_element_located(locator)
         )
 
-    def wait_for_url(self, url):
-        WebDriverWait(self.driver, DEFAULT_TIMEOUT).until(EC.url_to_be(url))
-
-    def wait_for_url_contains(self, text):
-        WebDriverWait(self.driver, DEFAULT_TIMEOUT).until(lambda d: text in d.current_url)
-
     def wait_for_new_window(self):
         WebDriverWait(self.driver, DEFAULT_TIMEOUT).until(lambda d: len(d.window_handles) > 1)
 
@@ -59,3 +54,29 @@ class BasePage:
 
     def open_url(self, url):
         self.driver.get(url)
+
+    def get_current_url(self):
+        return self.driver.current_url
+
+    def is_element_displayed(self, locator):
+        try:
+            WebDriverWait(self.driver, DEFAULT_TIMEOUT).until(
+                EC.visibility_of_element_located(locator)
+            )
+            return True
+        except TimeoutException:
+            return False
+
+    def is_current_url_equal(self, url):
+        try:
+            WebDriverWait(self.driver, DEFAULT_TIMEOUT).until(EC.url_to_be(url))
+            return True
+        except TimeoutException:
+            return False
+
+    def is_url_contains(self, text):
+        try:
+            WebDriverWait(self.driver, DEFAULT_TIMEOUT).until(lambda d: text in d.current_url)
+            return True
+        except TimeoutException:
+            return False
