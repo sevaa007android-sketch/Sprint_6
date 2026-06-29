@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+env/
+venv/
+.env
+
+# Selenium
+geckodriver.log
+chromedriver.log
+
+# pytest
+.pytest_cache/
+
+# Allure 
+allure-results/
+
+# IDE
+.vscode/
+.idea/
+*.swp
